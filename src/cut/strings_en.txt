@@ -1,0 +1,25 @@
+Код ресурса			Номер	Категория	Значение ресурса
+;СООБЩЕНИЯ:
+;===========================================
+SrcScriptRunning	001	1CON	Running {V1}:
+TestsRunningIn		002	1CON	- in {V1}
+TestPath			003	1CON	Test {V1}... 
+TestResult			004	1CON	{V1}
+ResultError			005	1CON	ERROR 
+ResultSkipped		006	1CON	SKIPPED 
+ResultFailed		007	1CON	FAILURE [{V1}] 
+ResultFailedFull	008	1CON	FAILURE [Check №{V1} - Code {V2}]
+ResultOk			009	1CON	Ok 
+TestsAborting		010	1CON	Aborting...
+ResultTestsRun		011	1CON	Tests run^: {V1}
+ResultTestsFailures	012	1CON	Failures^: {V1}
+ResultTestsErrors	013	1CON	Errors^: {V1}
+ResultTestsSkipped	014	1CON	Skipped^: {V1}
+ResultTime			015	1CON	Time elapsed^: {V1} [{V2}s total] 
+TestBroken			016	1CON	{V1}
+TestBrokenFull		017	1CON	{V1} [Check №{V2} - Code {V3}]
+BrokenTestsSkipped	018	1CON	Skipped tests [{V1}]
+BrokenTestsError	019	1CON	Error tests [{V1}]
+BrokenTestsFailed	020	1CON	Failed tests [{V1}]
+GreenRedLine		021	1CON	00000000000000000000000000000000000000000000
+SetupFixtureMsg		022	1CON	Setup fixture^: {V1}
