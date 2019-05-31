@@ -9,7 +9,9 @@ rem УСТАНОВКА И ОПРЕДЕЛЕНИЕ ЗНАЧЕНИЙ ПО УМОЛЧАНИЮ:
 rem текущий каталог
 set CUR_DIR=%~dp0
 rem каталог тестируемых (исходных) сценариев
-set DEF_SRC_PATH=../src
+set DEF_SRC_PATH=..%DIR_SEP%src
+rem каталог тестовых сценариев
+set DEF_TST_PATH=%CUR_DIR%
 rem Предопределённые скрипты:
 rem настройка и удаление фикстуры (тестового окружения)
 set SETUP_FILE=setup_before.cmd
@@ -41,7 +43,7 @@ set g_script_name=%g_script_name:cmd-win1251.cmd=exe%
 set g_script_header=Victory CUT [Command line interface Unit Testing] for Windows 7/10 {Current_Version}. {Copyright} {Current_Date}
 
 rem РАЗБОР ПАРАМЕТРОВ ЗАПУСКА:
-set test_param_defs="-lc,locale;-sp,p_src_path,%DEF_SRC_PATH%;-ss,p_src_script;-ts,p_test_script;-gl,p_green_line,%VL_FALSE%;-af,p_abort_on_fail,%VL_FALSE%;-so,p_supress_output,%VL_TRUE%"
+set test_param_defs="-lc,locale;-sp,p_src_path,%DEF_SRC_PATH%;-tp,p_tst_path,%DEF_TST_PATH%;-ss,p_src_script;-ts,p_test_script;-gl,p_green_line,%VL_FALSE%;-af,p_abort_on_fail,%VL_FALSE%;-so,p_supress_output,%VL_TRUE%"
 call :parse_params %~0 %test_param_defs% %*
 rem ошибка разбора определений параметров
 if ERRORLEVEL 2 set p_def_prm_err=%VL_TRUE%
@@ -56,13 +58,17 @@ set g_res_file=%CUR_DIR%strings_%locale%.txt
 set menus_file=%CUR_DIR%menus_%locale%.txt
 set help_file=%CUR_DIR%helps_%locale%.txt
 
+rem настройка пути к утилите вывода
+call :chgcolor_setup "%CUR_DIR%"
 rem выводим помощь
 if defined p_key_help call :test_help & endlocal & exit /b 0
 
 rem для всех сценариев устанавливаем режим выполнения - тестирование
-set EXEC_MODE=TST
+set EXEC_MODE=%EM_TST%
 rem переходим в текущий каталог сценария тестирования
-cd /d %CUR_DIR%
+for /f %%i in ("%p_tst_path%") do set p_tst_path=%%~dpnxi
+pushd "%p_tst_path%"
+rem cd /d %p_tst_path%
 
 set all_run=0
 set all_failed=0
@@ -79,8 +85,10 @@ set all_tests_start_time=%time%
 rem получаем все каталоги тестов (последний каталог, содержащий скрипты тестов именнуется как тестируемый сценарий)
 for /F %%a in ('dir /a:d /b /s 2^>nul') do (
 	set l_test_dir_ptrn=%%a
+	rem echo "!l_test_dir_ptrn!"
 	rem формируем путь к тестируемому сценарию
-	set l_src_dir=%p_src_path%/!l_test_dir_ptrn:%CUR_DIR%=!
+	set l_src_dir=%p_src_path%%DIR_SEP%!l_test_dir_ptrn:%p_tst_path%=!
+	echo "!l_src_dir!"
 	for /f %%i in ("!l_src_dir!") do set l_src_dir=%%~dpi
 	set l_src_script_name=%%~na
 	set l_src_script_path=!l_src_dir!!l_src_script_name!.cmd
@@ -102,6 +110,7 @@ for /F %%a in ('dir /a:d /b /s 2^>nul') do (
 	)
 )
 :end_tests
+popd
 if /i "%p_green_line%" EQU "%VL_TRUE%" echo.
 set all_tests_end_time=%time%
 set /a "failed_cnt=all_failed-1"
@@ -125,7 +134,6 @@ call :echo_broken_scripts %failed_cnt% BrokenTestsFailed 0C faileds
 
 call :echo_test_results 0F %all_run% %all_failed% %all_errors% %all_skipped% "%all_tests_start_time%" "%all_tests_end_time%"
 echo.
-
 exit /b 0
 
 rem ---------------------------------------------
@@ -149,8 +157,8 @@ rem формируем пути к сценариям-тестам
 rem выполняем предопределённый скрипт установки фикстуры
 set l_prepend_str=
 set l_append_str=
-if exist "%_test_dir_ptrn%/%SETUP_FILE%" (
-   	for /F "usebackq tokens=1,2 delims==" %%a IN (`%_test_dir_ptrn%\%SETUP_FILE% "%_src_script_path%" "%_src_dir%" "%_src_script_name%"`) DO (
+if exist "%_test_dir_ptrn%%DIR_SEP%%SETUP_FILE%" (
+   	for /F "usebackq tokens=1,2 delims==" %%a IN (`%_test_dir_ptrn%%DIR_SEP%%SETUP_FILE% "%_src_script_path%" "%_src_dir%" "%_src_script_name%"`) DO (
 		set l_order=%%~a
 		set l_script_path=%%~b
 		rem echo "!l_order!"="!l_script_path!"
@@ -223,11 +231,11 @@ set _src_dir=%~3
 set _src_script_name=%~4
 
 rem выполняем предопределённый скрипт удаления фикстуры
-if exist "%_test_dir_ptrn%/%TEARDOWN_FILE%" (
+if exist "%_test_dir_ptrn%%DIR_SEP%%TEARDOWN_FILE%" (
 	if /i "%p_supress_output%" EQU "%VL_TRUE%" (
-		call "%_test_dir_ptrn%/%TEARDOWN_FILE%" "%_src_script_path%" "%_src_dir%" "%_src_script_name%" 1>nul 2>&1
+		call "%_test_dir_ptrn%%DIR_SEP%%TEARDOWN_FILE%" "%_src_script_path%" "%_src_dir%" "%_src_script_name%" 1>nul 2>&1
 	) else (
-		call "%_test_dir_ptrn%/%TEARDOWN_FILE%" "%_src_script_path%" "%_src_dir%" "%_src_script_name%"
+		call "%_test_dir_ptrn%%DIR_SEP%%TEARDOWN_FILE%" "%_src_script_path%" "%_src_dir%" "%_src_script_name%"
 	)
 )
 endlocal & exit /b 0
@@ -444,7 +452,7 @@ rem утилитой
 rem ---------------------------------------------
 :test_help
 setlocal
-for /f %%i in ("%CUR_DIR%\%DEF_SRC_PATH%") do set l_src_dir=%%~dpnxi
+for /f %%i in ("%CUR_DIR%%DIR_SEP%%DEF_SRC_PATH%") do set l_src_dir=%%~dpnxi
 call :echo -rf:"%help_file%" -ri:ScriptHeader -v1:"%g_script_header%" -rc:0E -be:1
 call :echo -rf:"%help_file%" -ri:ScriptDescription -rc:0F
 call :echo -rf:"%help_file%" -ri:ScriptUsage -v1:"%g_script_name%" -rc:0F -be:1 -ae:1
