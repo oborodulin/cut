@@ -7,7 +7,7 @@ rem call %cd%\test_.cmd -lc:ru -ss:registry.cmd
 rem call %cd%\test_.cmd -lc:ru -ss:strings.cmd
 rem call %cd%\test_.cmd -lc:ru -ss:utils.cmd
 rem -so:false
-call %cd%\test_.cmd -lc:ru -sp:%cd%\..\..\..\bis\src -tp:%cd%\..\..\..\bis\tests -ss:bis.cmd -ts:test_wb_get_pkg_dirs.cmd -so:false
+call %cd%\test_.cmd -lc:ru -em:run -sp:%cd%\..\..\..\bis\src -tp:%cd%\..\..\..\bis\tests -ss:bis.cmd -ts:test_wb_binding_var.cmd -so:false
 rem call %cd%\test_.cmd -lc:ru -ss:bis.cmd -ts:test_wb_proc_trim.cmd
 rem call %cd%\test_.cmd -lc:ru -ss:bis.cmd -ts:test_wb_get_mod_install_dirs.cmd
 del /q %cd%\test_.cmd

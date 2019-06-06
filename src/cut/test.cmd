@@ -43,7 +43,7 @@ set g_script_name=%g_script_name:cmd-win1251.cmd=exe%
 set g_script_header=Victory CUT [Command line interface Unit Testing] for Windows 7/10 {Current_Version}. {Copyright} {Current_Date}
 
 rem РАЗБОР ПАРАМЕТРОВ ЗАПУСКА:
-set test_param_defs="-lc,locale;-sp,p_src_path,%DEF_SRC_PATH%;-tp,p_tst_path,%DEF_TST_PATH%;-ss,p_src_script;-ts,p_test_script;-gl,p_green_line,%VL_FALSE%;-af,p_abort_on_fail,%VL_FALSE%;-so,p_supress_output,%VL_TRUE%"
+set test_param_defs="-lc,locale;-em,EXEC_MODE,%EM_TST%;-sp,p_src_path,%DEF_SRC_PATH%;-tp,p_tst_path,%DEF_TST_PATH%;-ss,p_src_script;-ts,p_test_script;-gl,p_green_line,%VL_FALSE%;-af,p_abort_on_fail,%VL_FALSE%;-so,p_supress_output,%VL_TRUE%"
 call :parse_params %~0 %test_param_defs% %*
 rem ошибка разбора определений параметров
 if ERRORLEVEL 2 set p_def_prm_err=%VL_TRUE%
@@ -63,8 +63,6 @@ call :chgcolor_setup "%CUR_DIR%"
 rem выводим помощь
 if defined p_key_help call :test_help & endlocal & exit /b 0
 
-rem для всех сценариев устанавливаем режим выполнения - тестирование
-set EXEC_MODE=%EM_TST%
 rem переходим в текущий каталог сценария тестирования
 for /f %%i in ("%p_tst_path%") do set p_tst_path=%%~dpnxi
 pushd "%p_tst_path%"
@@ -87,8 +85,8 @@ for /F %%a in ('dir /a:d /b /s 2^>nul') do (
 	set l_test_dir_ptrn=%%a
 	rem echo "!l_test_dir_ptrn!"
 	rem формируем путь к тестируемому сценарию
-	set l_src_dir=%p_src_path%%DIR_SEP%!l_test_dir_ptrn:%p_tst_path%=!
-	echo "!l_src_dir!"
+	set l_src_dir=%p_src_path%%DIR_SEP%!l_test_dir_ptrn:%p_tst_path%%DIR_SEP%=!
+	rem echo "!l_src_dir!"
 	for /f %%i in ("!l_src_dir!") do set l_src_dir=%%~dpi
 	set l_src_script_name=%%~na
 	set l_src_script_path=!l_src_dir!!l_src_script_name!.cmd
